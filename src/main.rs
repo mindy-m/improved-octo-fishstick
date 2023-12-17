@@ -1,9 +1,20 @@
 use std::io::stdin;
 
+// Actual Rust source code (mostly™)
+// enum Option<T> {
+//     None,
+//     Some(T),
+// }
+//
+// enum Result<T,E> {
+//     Ok(T),
+//     Err(E),
+// }
+
 enum PlayerMove {
     Attack,
     Potion,
-    Unknown,
+    Unknown(String),
 }
 
 /// Get a line of input from the player. Returns `None` if there was no input
@@ -26,7 +37,7 @@ fn get_player_move() -> Option<PlayerMove> {
     let player_move = match input_line.as_str() {
         "attack" | "a" => PlayerMove::Attack,
         "potion" | "p" | "drink" | "d" => PlayerMove::Potion,
-        _ => PlayerMove::Unknown,
+        _ => PlayerMove::Unknown(input_line),
     };
     Some(player_move)
 }
@@ -75,8 +86,8 @@ fn main() {
                     println!("Something went wackadoodle.");
                 }
             }
-            PlayerMove::Unknown => {
-                println!("Please choose either 'attack' or 'potion'.");
+            PlayerMove::Unknown(wat) => {
+                println!("Please choose either 'attack' or 'potion'. '{wat}' is not an option, you fool.");
             }
         }
 
