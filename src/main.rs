@@ -1,5 +1,36 @@
 use std::io::stdin;
 
+enum PlayerMove {
+    Attack,
+    Potion,
+    Unknown,
+}
+
+/// Get a line of input from the player. Returns `None` if there was no input
+/// and never will be again.
+fn get_player_move() -> Option<PlayerMove> {
+    let input_line = match stdin().lines().next() {
+        Some(woot) => woot,
+        None => {
+            println!("Well I guess you're done with the game. Bye!");
+            return None;
+        }
+    };
+    let input_line = match input_line {
+        Ok(yay) => yay,
+        Err(uhoh) => {
+            println!("There was an error! {uhoh}");
+            return None;
+        }
+    };
+    let player_move = match input_line.as_str() {
+        "attack" | "a" => PlayerMove::Attack,
+        "potion" | "p" | "drink" | "d" => PlayerMove::Potion,
+        _ => PlayerMove::Unknown,
+    };
+    Some(player_move)
+}
+
 fn main() {
     let mut player_hp = 50;
     let mut opponent_hp = 100;
@@ -12,43 +43,43 @@ fn main() {
             opponent_hp
         );
         println!("Would you like to attack or use a potion?");
-        let input_line = match stdin().lines().next() {
-            Some(woot) => woot,
-            None => {
-                println!("Well I guess you're done with the game. Bye!");
-                return;
-            }
-        };
-        let input_line = match input_line {
-            Ok(yay) => yay,
-            Err(uhoh) => {
-                println!("There was an error! {uhoh}");
-                return;
-            }
+        let Some(input_line) = get_player_move() else {
+            return;
         };
         let mut player_move = false;
-        if input_line == "attack" {
-            opponent_hp -= 10;
-            println!("You have dealt 10 hp damage to your opponent.");
-            player_move = true;
-        } else if input_line == "potion" {
-            if potion_count > 0 {
-                player_hp += 30;
-                println!("You drank a potion. You healed 30 hp.");
-                if player_hp > 50 {
-                    player_hp = 50;
-                    println!("You are fully healed, but you wasted some of your potion.");
-                }
-                potion_count -= 1;
+
+        // match thing {
+        //     pattern => code,
+        //     pattern => code,
+        // }
+
+        match input_line {
+            PlayerMove::Attack => {
+                opponent_hp -= 10;
+                println!("You have dealt 10 hp damage to your opponent.");
                 player_move = true;
-            } else if potion_count == 0 {
-                println!("Sorry, you're out of potions.");
-            } else {
-                println!("Something went wackadoodle.");
             }
-        } else {
-            println!("Please choose either 'attack' or 'potion'.");
+            PlayerMove::Potion => {
+                if potion_count > 0 {
+                    player_hp += 30;
+                    println!("You drank a potion. You healed 30 hp.");
+                    if player_hp > 50 {
+                        player_hp = 50;
+                        println!("You are fully healed, but you wasted some of your potion.");
+                    }
+                    potion_count -= 1;
+                    player_move = true;
+                } else if potion_count == 0 {
+                    println!("Sorry, you're out of potions.");
+                } else {
+                    println!("Something went wackadoodle.");
+                }
+            }
+            PlayerMove::Unknown => {
+                println!("Please choose either 'attack' or 'potion'.");
+            }
         }
+
         if player_move {
             player_hp -= 10;
             println!("Your opponent dealt 10 hp damage.\n");
