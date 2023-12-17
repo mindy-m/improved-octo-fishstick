@@ -11,9 +11,13 @@ use std::io::stdin;
 //     Err(E),
 // }
 
+/// Possible actions a player can take.
 enum PlayerMove {
+    /// Attack the opponent.
     Attack,
+    /// Drink a healing potion, if (and only if) one is available.
     Potion,
+    /// An unknown command was entered, and here it is.
     Unknown(String),
 }
 
