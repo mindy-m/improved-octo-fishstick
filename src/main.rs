@@ -1,4 +1,4 @@
-use std::io::stdin;
+use std::{collections::binary_heap::Drain, io::stdin};
 
 // Actual Rust source code (mostly™)
 // enum Option<T> {
@@ -10,6 +10,52 @@ use std::io::stdin;
 //     Ok(T),
 //     Err(E),
 // }
+
+struct Opponent {
+    hp: i32,
+}
+
+struct Player {
+    hp: i32,
+    potion_count: i32,
+}
+
+impl Player {
+    fn is_alive(&self) -> bool {
+        self.hp > 0
+    }
+    /// Try to attack the opponent. Return true if the move was successful.
+    fn attack_opponent(&self, opponent: &mut Opponent) -> bool {
+        opponent.hp -= 10;
+        println!("You have dealt 10 hp damage to your opponent.");
+        true
+    }
+    /// Try to drink a potion. Return true if the move was successful.
+    fn drink_potion(&mut self) -> bool {
+        if self.potion_count > 0 {
+            self.hp += 30;
+            println!("You drank a potion. You healed 30 hp.");
+            if self.hp > 50 {
+                self.hp = 50;
+                println!("You are fully healed, but you wasted some of your potion.");
+            }
+            self.potion_count -= 1;
+            return true;
+        } else if self.potion_count == 0 {
+            println!("Sorry, you're out of potions.");
+            return false;
+        } else {
+            println!("Something went wackadoodle.");
+            return false;
+        }
+    }
+}
+
+impl Opponent {
+    fn is_alive(&self) -> bool {
+        self.hp > 0
+    }
+}
 
 /// Possible actions a player can take.
 enum PlayerMove {
@@ -47,67 +93,58 @@ fn get_player_move() -> Option<PlayerMove> {
 }
 
 fn main() {
-    let mut player_hp = 50;
-    let mut opponent_hp = 100;
-    let mut potion_count = 3;
+    let mut player = Player {
+        hp: 50,
+        potion_count: 3,
+    };
+
+    let mut opponent = Opponent { hp: 100 };
 
     println!("Welcome!  You're in a boss fight!  Isn't that exciting...\n");
-    while player_hp > 0 && opponent_hp > 0 {
+    while player.is_alive() && opponent.is_alive() {
         println!(
-            "Your current hp is {player_hp} and your opponent's hp is {}",
-            opponent_hp
+            "Your current hp is {} and your opponent's hp is {}",
+            player.hp, opponent.hp
         );
         println!("Would you like to attack or use a potion?");
         let Some(input_line) = get_player_move() else {
             return;
         };
-        let mut player_move = false;
 
         // match thing {
         //     pattern => code,
         //     pattern => code,
         // }
 
+        let player_move;
         match input_line {
             PlayerMove::Attack => {
-                opponent_hp -= 10;
-                println!("You have dealt 10 hp damage to your opponent.");
-                player_move = true;
+                player_move = player.attack_opponent(&mut opponent);
             }
+
             PlayerMove::Potion => {
-                if potion_count > 0 {
-                    player_hp += 30;
-                    println!("You drank a potion. You healed 30 hp.");
-                    if player_hp > 50 {
-                        player_hp = 50;
-                        println!("You are fully healed, but you wasted some of your potion.");
-                    }
-                    potion_count -= 1;
-                    player_move = true;
-                } else if potion_count == 0 {
-                    println!("Sorry, you're out of potions.");
-                } else {
-                    println!("Something went wackadoodle.");
-                }
+                player_move = player.drink_potion();
             }
+
             PlayerMove::Unknown(wat) => {
                 println!("Please choose either 'attack' or 'potion'. '{wat}' is not an option, you fool.");
+                player_move = false;
             }
         }
 
         if player_move {
-            player_hp -= 10;
+            player.hp -= 10;
             println!("Your opponent dealt 10 hp damage.\n");
         }
     }
-    if player_hp == 0 {
-        if opponent_hp == 0 {
+    if !player.is_alive() {
+        if !opponent.is_alive() {
             println!(
                 "While you defeated your opponent, you are also dead, so you can't celebrate."
             );
         }
         println!("Game over, you lost.");
-    } else if opponent_hp == 0 {
+    } else if !opponent.is_alive() {
         println!("Congratulations, you won!");
     } else {
         println!("I don't know what happened.");
