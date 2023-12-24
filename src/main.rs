@@ -11,25 +11,26 @@ use std::io::stdin;
 //     Err(E),
 // }
 
-struct Opponent {
+struct PotionlessFool {
     hp: i32,
 }
 
-struct Player {
+struct SomeoneWithPotions {
     hp: i32,
     potion_count: i32,
 }
 
-impl Player {
+impl SomeoneWithPotions {
     fn is_alive(&self) -> bool {
         self.hp > 0
     }
     /// Try to attack the opponent. Return true if the move was successful.
-    fn attack_opponent(&self, opponent: &mut Opponent) -> bool {
+    fn attack_opponent(&self, opponent: &mut PotionlessFool) -> bool {
         opponent.hp -= 10;
         println!("You have dealt 10 hp damage to your opponent.");
         true
     }
+
     /// Try to drink a potion. Return true if the move was successful.
     fn drink_potion(&mut self) -> bool {
         if self.potion_count > 0 {
@@ -51,9 +52,15 @@ impl Player {
     }
 }
 
-impl Opponent {
+impl PotionlessFool {
     fn is_alive(&self) -> bool {
         self.hp > 0
+    }
+
+    fn attack_player(&self, player: &mut SomeoneWithPotions) -> bool {
+        player.hp -= 10;
+        println!("Your opponent dealt 10 hp damage.\n");
+        true
     }
 }
 
@@ -93,12 +100,18 @@ fn get_player_move() -> Option<PlayerMove> {
 }
 
 fn main() {
-    let mut player = Player {
+    let mut player = SomeoneWithPotions {
         hp: 50,
         potion_count: 3,
     };
 
-    let mut opponent = Opponent { hp: 100 };
+    // fn attack_opponent(&self, opponent: &mut Opponent) -> bool {
+
+    let mut opponent = PotionlessFool { hp: 100 };
+    // let mut opponent = Player {
+    //     hp: 50,
+    //     potion_count: 3,
+    // };
 
     println!("Welcome!  You're in a boss fight!  Isn't that exciting...\n");
     while player.is_alive() && opponent.is_alive() {
@@ -110,6 +123,11 @@ fn main() {
         let Some(input_line) = get_player_move() else {
             return;
         };
+        // Same as:
+        // let input_line = match get_player_move() {
+        //     Some(x) => x,
+        //     _ => return,
+        // };
 
         // match thing {
         //     pattern => code,
@@ -133,8 +151,7 @@ fn main() {
         }
 
         if player_move {
-            player.hp -= 10;
-            println!("Your opponent dealt 10 hp damage.\n");
+            opponent.attack_player(&mut player);
         }
     }
     if !player.is_alive() {
