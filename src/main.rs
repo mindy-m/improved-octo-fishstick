@@ -1,4 +1,4 @@
-use std::{collections::binary_heap::Drain, io::stdin};
+use std::io::stdin;
 
 // Actual Rust source code (mostly™)
 // enum Option<T> {
