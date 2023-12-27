@@ -11,9 +11,54 @@ use std::io::stdin;
 //     Err(E),
 // }
 
+trait Combatant {
+    // The get_name function will need to know if it is the opponent or the player making a move (eventually custom name?)
+    fn get_name(&self) -> &str;
+    fn is_alive(&self) -> bool;
+    fn take_damage(&mut self, damage_amount: i32);
+    fn attack_combatant(&self, target: &mut dyn Combatant) -> bool {
+        let damage_amount = 10;
+        target.take_damage(damage_amount);
+        // If you are using a .something, you can't put the variable inside the {} in the println - need to put them at the end after , ...
+        println!(
+            "{} attacked {}, dealing {damage_amount} damage.",
+            self.get_name(),
+            target.get_name(),
+        );
+        // Sir Stabbington attacked Dr. Meow Mix, dealing 10 damage.
+        // You have dealt 10 hp damage to your opponent.
+        // You attacked your opponent dealing 10 damage.
+        // Your opponent attacked you dealing 10 damage.
+        true
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Potionless fool
+///////////////////////////////////////////////////////////////////////////////
+
 struct PotionlessFool {
     hp: i32,
 }
+
+impl Combatant for PotionlessFool {
+    fn is_alive(&self) -> bool {
+        self.hp > 0
+    }
+
+    fn take_damage(&mut self, damage_amount: i32) {
+        self.hp -= damage_amount;
+    }
+
+    fn get_name(&self) -> &str {
+        // no
+        "Hardcoded Names are Cool McCoolingston the Fourth (PhD, BSC)"
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Someone with potions
+///////////////////////////////////////////////////////////////////////////////
 
 struct SomeoneWithPotions {
     hp: i32,
@@ -21,16 +66,6 @@ struct SomeoneWithPotions {
 }
 
 impl SomeoneWithPotions {
-    fn is_alive(&self) -> bool {
-        self.hp > 0
-    }
-    /// Try to attack the opponent. Return true if the move was successful.
-    fn attack_opponent(&self, opponent: &mut PotionlessFool) -> bool {
-        opponent.hp -= 10;
-        println!("You have dealt 10 hp damage to your opponent.");
-        true
-    }
-
     /// Try to drink a potion. Return true if the move was successful.
     fn drink_potion(&mut self) -> bool {
         if self.potion_count > 0 {
@@ -52,17 +87,23 @@ impl SomeoneWithPotions {
     }
 }
 
-impl PotionlessFool {
+impl Combatant for SomeoneWithPotions {
     fn is_alive(&self) -> bool {
         self.hp > 0
     }
 
-    fn attack_player(&self, player: &mut SomeoneWithPotions) -> bool {
-        player.hp -= 10;
-        println!("Your opponent dealt 10 hp damage.\n");
-        true
+    fn take_damage(&mut self, damage_amount: i32) {
+        self.hp -= damage_amount;
+    }
+
+    fn get_name(&self) -> &str {
+        "Some Cool Person With Potions"
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// other stuff
+///////////////////////////////////////////////////////////////////////////////
 
 /// Possible actions a player can take.
 enum PlayerMove {
@@ -105,18 +146,16 @@ fn main() {
         potion_count: 3,
     };
 
-    // fn attack_opponent(&self, opponent: &mut Opponent) -> bool {
-
-    let mut opponent = PotionlessFool { hp: 100 };
-    // let mut opponent = Player {
-    //     hp: 50,
-    //     potion_count: 3,
-    // };
+    // let mut opponent = PotionlessFool { hp: 100 };
+    let mut opponent = SomeoneWithPotions {
+        hp: 50,
+        potion_count: 3,
+    };
 
     println!("Welcome!  You're in a boss fight!  Isn't that exciting...\n");
     while player.is_alive() && opponent.is_alive() {
         println!(
-            "Your current hp is {} and your opponent's hp is {}",
+            "Your current hp is {} and your opponent's hp is {}.",
             player.hp, opponent.hp
         );
         println!("Would you like to attack or use a potion?");
@@ -134,24 +173,24 @@ fn main() {
         //     pattern => code,
         // }
 
-        let player_move;
+        let valid_player_move;
         match input_line {
             PlayerMove::Attack => {
-                player_move = player.attack_opponent(&mut opponent);
+                valid_player_move = player.attack_combatant(&mut opponent);
             }
 
             PlayerMove::Potion => {
-                player_move = player.drink_potion();
+                valid_player_move = player.drink_potion();
             }
 
             PlayerMove::Unknown(wat) => {
                 println!("Please choose either 'attack' or 'potion'. '{wat}' is not an option, you fool.");
-                player_move = false;
+                valid_player_move = false;
             }
         }
 
-        if player_move {
-            opponent.attack_player(&mut player);
+        if valid_player_move {
+            opponent.attack_combatant(&mut player);
         }
     }
     if !player.is_alive() {
