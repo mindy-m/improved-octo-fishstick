@@ -13,7 +13,7 @@ use std::io::stdin;
 
 trait Combatant {
     // The get_name function will need to know if it is the opponent or the player making a move (eventually custom name?)
-    fn get_name(&self) -> &str;
+    fn get_name(&self) -> String;
     fn is_alive(&self) -> bool;
     fn take_damage(&mut self, damage_amount: i32);
     fn attack_combatant(&self, target: &mut dyn Combatant) -> bool {
@@ -50,9 +50,9 @@ impl Combatant for PotionlessFool {
         self.hp -= damage_amount;
     }
 
-    fn get_name(&self) -> &str {
+    fn get_name(&self) -> String {
         // no
-        "Hardcoded Names are Cool McCoolingston the Fourth (PhD, BSC)"
+        "Hardcoded Names are Cool McCoolingston the Fourth (PhD, BSC)".to_string()
     }
 }
 
@@ -63,6 +63,7 @@ impl Combatant for PotionlessFool {
 struct SomeoneWithPotions {
     hp: i32,
     potion_count: i32,
+    name: String,
 }
 
 impl SomeoneWithPotions {
@@ -96,8 +97,8 @@ impl Combatant for SomeoneWithPotions {
         self.hp -= damage_amount;
     }
 
-    fn get_name(&self) -> &str {
-        "Some Cool Person With Potions"
+    fn get_name(&self) -> String {
+        self.name.to_string()
     }
 }
 
@@ -144,12 +145,14 @@ fn main() {
     let mut player = SomeoneWithPotions {
         hp: 50,
         potion_count: 3,
+        name: "Hero".to_string(),
     };
 
     // let mut opponent = PotionlessFool { hp: 100 };
     let mut opponent = SomeoneWithPotions {
         hp: 50,
         potion_count: 3,
+        name: "Bad Guy".to_string(),
     };
 
     println!("Welcome!  You're in a boss fight!  Isn't that exciting...\n");
