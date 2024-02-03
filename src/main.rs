@@ -13,7 +13,7 @@ use std::io::stdin;
 
 trait Combatant {
     // The get_name function will need to know if it is the opponent or the player making a move (eventually custom name?)
-    fn get_name(&self) -> String;
+    fn get_name(&self) -> &str;
     fn is_alive(&self) -> bool;
     fn take_damage(&mut self, damage_amount: i32);
     fn attack_combatant(&self, target: &mut dyn Combatant) -> bool {
@@ -50,9 +50,9 @@ impl Combatant for PotionlessFool {
         self.hp -= damage_amount;
     }
 
-    fn get_name(&self) -> String {
+    fn get_name(&self) -> &str {
         // no
-        "Hardcoded Names are Cool McCoolingston the Fourth (PhD, BSC)".to_string()
+        "Hardcoded Names are Cool McCoolingston the Fourth (PhD, BSC)"
     }
 }
 
@@ -97,8 +97,8 @@ impl Combatant for SomeoneWithPotions {
         self.hp -= damage_amount;
     }
 
-    fn get_name(&self) -> String {
-        self.name.to_string()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 }
 
